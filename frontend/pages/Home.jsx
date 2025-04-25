@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 
 function Home() {
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("user"); // Default role is user
   const [errorMessage, setErrorMessage] = useState("");
@@ -11,29 +11,29 @@ function Home() {
   const handleRegister = async () => {
     try {
       const response = await axios.post("http://localhost:5000/api/auth/register", {
-        email,
+        username,
         password,
         role
       });
       alert('Registration successful!');
-      setEmail('');
+      setUsername('');
       setPassword('');
       setRole('user');
     } catch (error) {
-      setErrorMessage(error.response.data || "Registration failed");
+      setErrorMessage(error.response?.data?.message || "Registration failed");
     }
   };
 
   const handleLogin = async () => {
     try {
       const response = await axios.post("http://localhost:5000/api/auth/login", {
-        email,
+        username,
         password
       });
       localStorage.setItem("token", response.data.token);
-      window.location.href = '/admin/dashboard'; // Redirect to admin dashboard after login
+      window.location.href = '/admin'; // Redirect to admin dashboard after login
     } catch (error) {
-      setErrorMessage(error.response.data || "Login failed");
+      setErrorMessage(error.response?.data?.message || "Login failed");
     }
   };
 
@@ -42,10 +42,10 @@ function Home() {
       <h1>{isLogin ? "Login" : "Register"}</h1>
 
       <input 
-        type="email" 
-        placeholder="Email" 
-        value={email} 
-        onChange={(e) => setEmail(e.target.value)} 
+        type="text" 
+        placeholder="Username" 
+        value={username} 
+        onChange={(e) => setUsername(e.target.value)} 
       />
       <input 
         type="password" 
@@ -69,7 +69,7 @@ function Home() {
         {isLogin ? "Login" : "Register"}
       </button>
 
-      <p>{errorMessage}</p>
+      <p style={{ color: 'red' }}>{errorMessage}</p>
       
       {/* Toggle between login and register form */}
       <button onClick={() => setIsLogin(!isLogin)}>

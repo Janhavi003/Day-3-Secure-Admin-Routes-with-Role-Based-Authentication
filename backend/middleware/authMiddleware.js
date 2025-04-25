@@ -1,14 +1,23 @@
-// Middleware to verify if the user is authenticated
+const jwt = require('jsonwebtoken');
+
 const verifyToken = (req, res, next) => {
-    // Issue: No JWT verification here yet
-    next(); // Should check JWT here
-  };
-  
-  // Middleware to verify if the user is an admin
-  const isAdmin = (req, res, next) => {
-    // Issue: Should check for the role of the user (admin or user)
-    next(); // Should check role and decide if allowed
-  };
-  
-  module.exports = { verifyToken, isAdmin };
-  
+  const authHeader = req.headers.authorization;
+  if (!authHeader) return res.status(403).json({ message: 'No token provided' });
+
+  const token = authHeader.split(' ')[1];
+
+  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+    if (err) return res.status(401).json({ message: 'Invalid token' });
+    req.user = decoded; // Add user info to request object
+    next();
+  });
+};
+
+const isAdmin = (req, res, next) => {
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ message: 'Admin access only' });
+  }
+  next();
+};
+
+module.exports = { verifyToken, isAdmin };
